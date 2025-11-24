@@ -57,7 +57,7 @@ pipeline {
         }
         stage('Dependency Check') {
             environment {
-                NVD_API_KEY = credentials('nvdApiKey')
+                NVD_API_KEY = credentials("nvdApiKey")
             }
             steps {
                 dependencyCheck additionalArguments: "--scan . --format HTML --out dependency-check-report --enableExperimental --enableRetired --nvdApiKey $NVD_API_KEY", odcInstallation: 'DependencyCheck'
