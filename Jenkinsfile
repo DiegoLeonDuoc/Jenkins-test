@@ -32,6 +32,7 @@ pipeline {
         stage('OWASP ZAP (DAST Scan)') {
             agent {
                 docker { image 'zaproxy/zap-stable' }
+                args '-v $WORKSPACE:/zap/wrk'
             }
             steps {
                 echo "Ejecutando escaneo dinámico con OWASP ZAP..."
