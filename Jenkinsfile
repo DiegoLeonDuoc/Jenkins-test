@@ -53,11 +53,12 @@ pipeline {
                     withSonarQubeEnv('SonarQube Install') {
                         sh """
                             ${scannerHome}/bin/sonar-scanner \
-                                -Dsonar.projectKey=$PROJECT_NAME \
-                                -Dsonar.sources=. \
-                                -Dsonar.host.url=$SONARQUBE_URL \
-                                -Dsonar.login=$SONARQUBE_TOKEN \
-                                -Dsonar.exclusions=**/dependency-check-report/**,**/*.html,**/*.md,**/flask.log,**/flask.pid
+                                -D sonar.projectKey=$PROJECT_NAME \
+                                -D sonar.sources=. \
+                                -D sonar.host.url=$SONARQUBE_URL \
+                                -D sonar.token=$SONARQUBE_TOKEN \
+                                -D sonar.exclusions=**/dependency-check-report/**,**/*.html,**/*.md,**/flask.log,**/flask.pid \
+                                -D sonar.python.version=3.13
                         """
                     }
                 }
