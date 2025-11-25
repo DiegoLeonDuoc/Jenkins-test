@@ -56,7 +56,8 @@ pipeline {
                                 -Dsonar.projectKey=$PROJECT_NAME \
                                 -Dsonar.sources=. \
                                 -Dsonar.host.url=$SONARQUBE_URL \
-                                -Dsonar.login=$SONARQUBE_TOKEN
+                                -Dsonar.login=$SONARQUBE_TOKEN \
+                                -Dsonar.exclusions=**/dependency-check-report/**,**/*.html,**/*.md,**/flask.log,**/flask.pid
                         """
                     }
                 }
