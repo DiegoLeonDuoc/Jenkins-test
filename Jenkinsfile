@@ -157,6 +157,7 @@ pipeline {
         stage('Publish Reports') {
             steps {
                 echo "Publicando reporte y finalizando..."
+                sh "ls -l"
                 archiveArtifacts artifacts: 'dependency-check-report/dependency-check-report.html', fingerprint: true
                 archiveArtifacts artifacts: 'zap_report.html', fingerprint: true
                 archiveArtifacts artifacts: 'dependency-check-report/pip-audit.md', fingerprint: true
