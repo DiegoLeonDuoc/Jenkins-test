@@ -84,7 +84,7 @@ pipeline {
                     nohup python vulnerable_server.py > flask.log 2>&1 &
                     echo $! > flask.pid
                     echo "Esperando servidor..."
-                    sleep 10
+                    sleep 5
                     curl ${TARGET_URL}
                 '''
             }
@@ -123,6 +123,7 @@ pipeline {
 
         stage('Publish Reports') {
             steps {
+                sh "pwd"
                 echo "Publicando reporte y finalizando..."
                 publishHTML([
                     allowMissing: false,
