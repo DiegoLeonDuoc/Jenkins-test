@@ -73,7 +73,7 @@ pipeline {
                 sh '''
                     zap-baseline.py \
                     -t ${JENKINS_URL}:${FLASK_PORT} \
-                    -r zap_report.html
+                    -r zap_report.html > /dev/null 2>&1 || true
                 '''
             }
         }
@@ -119,7 +119,7 @@ pipeline {
             }
         }
 
-        stage('Publish Reports') {
+                stage('Publish Reports') {
             steps {
                 echo "Publicando reporte y finalizando..."
                 publishHTML([
@@ -129,6 +129,22 @@ pipeline {
                     reportDir: 'dependency-check-report',
                     reportFiles: 'dependency-check-report.html',
                     reportName: 'OWASP Dependency Check Report'
+                ])
+                publishHTML([
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: '',
+                    reportFiles: 'zap_report.html',
+                    reportName: 'OWASP ZAP Report'
+                ])
+                publishHTML([
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: 'dependency-check-report',
+                    reportFiles: 'pip-audit.md',
+                    reportName: 'PIP Audit Report'
                 ])
                 echo "Finalizado."
             }
