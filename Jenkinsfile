@@ -6,7 +6,8 @@ pipeline {
         SONARQUBE_URL = "http://sonarqube:9000"
         SONARQUBE_TOKEN = "sqa_d8a9666b36e5cc9a23732692362a620bbc36a7e8"
         FLASK_PORT = '5000'
-        TARGET_URL = "http://localhost:${FLASK_PORT}"
+        TARGET_URL = "http://127.0.0.1:${FLASK_PORT}"
+        JENKINS_URL ="172.18.0.2"
     }
 
     stages {
@@ -71,7 +72,7 @@ pipeline {
                 echo "Ejecutando escaneo dinámico con OWASP ZAP..."
                 sh '''
                     zap-baseline.py \
-                    -t ${TARGET_URL} \
+                    -t ${JENKINS_URL}:{FLASK_PORT} \
                     -r zap_report.html
                 '''
             }
