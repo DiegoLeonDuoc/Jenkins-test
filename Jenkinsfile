@@ -4,7 +4,7 @@ pipeline {
     environment {
         PROJECT_NAME = "owasp-pipeline-test"
         SONARQUBE_URL = "http://sonarqube:9000"
-        SONARQUBE_TOKEN = "sqa_d8a9666b36e5cc9a23732692362a620bbc36a7e8"
+        SONARQUBE_TOKEN = "sqa_f096d3acf4b8f8111801c7bd16964195d665f12e"
         FLASK_PORT = '5000'
         TARGET_URL = "http://127.0.0.1:${FLASK_PORT}"
         JENKINS_URL ="http://172.18.0.2"
