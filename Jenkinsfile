@@ -72,7 +72,7 @@ pipeline {
                 echo "Ejecutando escaneo dinámico con OWASP ZAP..."
                 sh '''
                     zap-baseline.py \
-                    -t ${JENKINS_URL}:{FLASK_PORT} \
+                    -t ${JENKINS_URL}:${FLASK_PORT} \
                     -r zap_report.html
                 '''
             }
