@@ -5,7 +5,7 @@ pipeline {
         PROJECT_NAME = "pipeline-test"
         SONARQUBE_URL = "http://sonarqube:9000"
         SONARQUBE_TOKEN = "sqa_d8a9666b36e5cc9a23732692362a620bbc36a7e8"
-        //TARGET_URL = "http://172.18.0.1:5000/"
+        TARGET_URL = "http://172.18.0.4:3000/"
     }
 
     stages {
@@ -28,6 +28,22 @@ pipeline {
                 '''
             }
         }
+
+        stage('OWASP ZAP (DAST Scan)') {
+            agent {
+                docker { image 'zaproxy/zap-stable' }
+            }
+            steps {
+                echo "Ejecutando escaneo dinámico con OWASP ZAP..."
+                sh '''
+                docker run --network="host" --rm \
+                zaproxy/zap-stable zap-baseline.py \
+                -t ${TARGET_URL} \
+                -r zap_report.html
+                '''
+            }
+        }
+
         stage('Python Security Audit') {
             steps {
                 sh '''
@@ -55,6 +71,7 @@ pipeline {
                 }
             }
         }
+
         stage('Dependency Check') {
             environment {
                 NVD_API_KEY = credentials('nvdApiKey')
