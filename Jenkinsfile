@@ -5,7 +5,7 @@ pipeline {
         PROJECT_NAME = "pipeline-test"
         SONARQUBE_URL = "http://sonarqube:9000"
         SONARQUBE_TOKEN = "sqa_d8a9666b36e5cc9a23732692362a620bbc36a7e8"
-        TARGET_URL = "http://172.18.0.1:5000/"
+        TARGET_URL = "http://localhost:5000/"
     }
 
     stages {
@@ -29,24 +29,6 @@ pipeline {
             }
         }
 
-        stage('OWASP ZAP (DAST Scan)') {
-            agent {
-                docker {
-                    image 'zaproxy/zap-stable'
-                    args '-v $WORKSPACE:/zap/wrk'
-                }
-
-            }
-            steps {
-                echo "Ejecutando escaneo dinámico con OWASP ZAP..."
-                sh '''
-                    zap-baseline.py \
-                    -t ${TARGET_URL} \
-                    -r zap_report.html
-                '''
-            }
-        }
-
         stage('Python Security Audit') {
             steps {
                 sh '''
@@ -57,6 +39,73 @@ pipeline {
                 '''
             }
         }
+
+        stage('OWASP ZAP (DAST Scan)') {
+            agent {
+                docker {
+                    image 'zaproxy/zap-stable'
+                    args '-v $WORKSPACE:/zap/wrk --network host'
+                }
+            }
+            steps {
+                script {
+                    sh '''
+                        set -e
+                        . /zap/wrk/venv/bin/activate
+
+                        nohup python /zap/wrk/app.py > flask.log 2>&1 &
+                        echo $! > flask.pid
+
+                        echo "Waiting for Flask to become reachable..."
+                        for i in {1..10}; do
+                            if curl -s http://172.18.0.1:5000/ > /dev/null; then
+                                echo "Flask is up!"
+                                break
+                            fi
+                            sleep 1
+                        done
+                    '''
+
+                    // 2️⃣ Run the ZAP baseline scan
+                    sh '''
+                        echo "Running ZAP baseline scan..."
+                        zap-baseline.py \
+                            -t ${TARGET_URL} \
+                            -r zap_report.html
+                    '''
+
+                    // 3️⃣ Stop the Flask process
+                    sh '''
+                        if [ -f flask.pid ]; then
+                            kill $(cat flask.pid) && echo "Flask stopped"
+                        else
+                            echo "No Flask PID file – nothing to kill"
+                        fi
+                    '''
+                }
+
+                // Archive the ZAP report for later review
+                archiveArtifacts artifacts: 'zap_report.html', fingerprint: true
+            }
+        }
+
+//         stage('OWASP ZAP (DAST Scan)') {
+//             agent {
+//                 docker {
+//                     image 'zaproxy/zap-stable'
+//                     args '-v $WORKSPACE:/zap/wrk'
+//                 }
+//
+//             }
+//             steps {
+//                 echo "Ejecutando escaneo dinámico con OWASP ZAP..."
+//                 sh '''
+//                     zap-baseline.py \
+//                     -t ${TARGET_URL} \
+//                     -r zap_report.html
+//                 '''
+//             }
+//         }
         
         stage('SonarQube Analysis') {
             steps {
@@ -96,6 +145,8 @@ pipeline {
                 ])
             }
         }
+
+
     }
 
 }
