@@ -7,7 +7,7 @@ pipeline {
         SONARQUBE_TOKEN = "sqa_d8a9666b36e5cc9a23732692362a620bbc36a7e8"
         FLASK_PORT = '5000'
         TARGET_URL = "http://127.0.0.1:${FLASK_PORT}"
-        JENKINS_URL ="172.18.0.2"
+        JENKINS_URL ="http://172.18.0.2"
     }
 
     stages {
