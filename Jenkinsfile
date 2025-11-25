@@ -119,7 +119,7 @@ pipeline {
             }
         }
 
-                stage('Publish Reports') {
+        stage('Publish Reports') {
             steps {
                 echo "Publicando reporte y finalizando..."
                 publishHTML([
@@ -128,7 +128,8 @@ pipeline {
                     keepAll: true,
                     reportDir: 'dependency-check-report',
                     reportFiles: 'dependency-check-report.html',
-                    reportName: 'OWASP Dependency Check Report'
+                    reportName: 'OWASP Dependency Check Report',
+                    includes: '**/*.html'
                 ])
                 publishHTML([
                     allowMissing: false,
@@ -136,7 +137,8 @@ pipeline {
                     keepAll: true,
                     reportDir: '',
                     reportFiles: 'zap_report.html',
-                    reportName: 'OWASP ZAP Report'
+                    reportName: 'OWASP ZAP Report',
+                    includes: '**/*.html'
                 ])
                 publishHTML([
                     allowMissing: false,
@@ -144,13 +146,11 @@ pipeline {
                     keepAll: true,
                     reportDir: 'dependency-check-report',
                     reportFiles: 'pip-audit.md',
-                    reportName: 'PIP Audit Report'
+                    reportName: 'PIP Audit Report',
+                    includes: '**/*'
                 ])
                 echo "Finalizado."
             }
         }
-
-
     }
-
 }
