@@ -102,7 +102,7 @@ pipeline {
                 sh '''
                     zap-baseline.py \
                     -t ${JENKINS_URL}:${FLASK_PORT} \
-                    -r /var/jenkins_home/workspace/Test-Pipeline-Sonar@2/zap_report.html > /dev/null 2>&1 || true
+                    -r /var/jenkins_home/workspace/Test-Pipeline-Sonar/zap_report.html > /dev/null 2>&1 || true
                     ls -la
                 '''
             }
@@ -134,15 +134,15 @@ pipeline {
                     reportName: 'OWASP Dependency Check Report',
                     includes: '**/*.html'
                 ])
-//                 publishHTML([
-//                     allowMissing: false,
-//                     alwaysLinkToLastBuild: true,
-//                     keepAll: true,
-//                     reportDir: '',
-//                     reportFiles: 'zap_report.html',
-//                     reportName: 'OWASP ZAP Report',
-//                     includes: '**/*.html'
-//                 ])
+                publishHTML([
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: '',
+                    reportFiles: 'zap_report.html',
+                    reportName: 'OWASP ZAP Report',
+                    includes: '**/*.html'
+                ])
                 publishHTML([
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
@@ -152,7 +152,7 @@ pipeline {
                     reportName: 'PIP Audit Report',
                     includes: '**/*'
                 ])
-                archiveArtifacts artifacts: 'zap_report.html', fingerprint: true
+//                 archiveArtifacts artifacts: 'zap_report.html', fingerprint: true
                 echo "Finalizado."
             }
         }
