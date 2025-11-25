@@ -52,7 +52,9 @@ pipeline {
                     . venv/bin/activate
                     nohup python vulnerable_server.py > flask.log 2>&1 &
                     echo $! > flask.pid
+                    echo "Esperando servidor..."
                     sleep 10
+                    curl localhost:5000
                     # wait until the HTTP endpoint answers
                     for i in {1..15}; do
                         if curl -s ${TARGET_URL}/ > /dev/null; then
