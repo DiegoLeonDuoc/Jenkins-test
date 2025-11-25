@@ -94,52 +94,35 @@ pipeline {
             agent {
                 docker {
                     image 'zaproxy/zap-stable'
-                    args '-v $WORKSPACE:/zap/wrk --network host -u root'
+                    args '-v /var/jenkins_home/workspace/Test-Pipeline-Sonar:/zap/wrk --network host -u root'
                 }
             }
             steps {
                 echo "Ejecutando escaneo dinámico con OWASP ZAP..."
-                echo "$WORKSPACE"
                 sh '''
                     cd /zap/wrk
-                    zap-baseline.py -t ${JENKINS_URL}:${FLASK_PORT} -r /zap/wrk/zap_report.html
+                    zap-baseline.py -t ${JENKINS_URL}:${FLASK_PORT} -r zap_report.html
+                    ls -la
+                    cd ..
+                    ls -la
+                    cd ..
+                    ls -la
                 '''
-            }
-            post {
-                always {
-                    // This runs outside the container, in the Jenkins workspace
-                    script {
-                        if (fileExists('zap_report.html')) {
-                            echo "Report found in workspace"
-                            publishHTML([
-                                allowMissing: false,
-                                alwaysLinkToLastBuild: true,
-                                keepAll: true,
-                                reportDir: '',
-                                reportFiles: 'zap_report.html',
-                                reportName: 'ZAP Security Report'
-                            ])
-                        } else {
-                            echo "Report not found. Workspace contents:"
-                            sh 'ls -la'
-                        }
-                    }
-                }
             }
         }
 
-        stage('Stop Flask server') {
-            steps {
-                echo "Deteniendo servidor vulnerable..."
-                sh '''
-                    if [ -f flask.pid ]; then
-                        kill $(cat flask.pid) && echo "Flask stopped"
-                    else
-                        echo "PID file not found"
-                    fi
-                '''
+            stage('Stop Flask server') {
+                steps {
+                    echo "Deteniendo servidor vulnerable..."
+                    sh '''
+                        if [ -f flask.pid ]; then
+                            kill $(cat flask.pid) && echo "Flask stopped"
+                        else
+                            echo "PID file not found"
+                        fi
+                    '''
+                }
             }
-        }
 
         stage('Publish Reports') {
             steps {
