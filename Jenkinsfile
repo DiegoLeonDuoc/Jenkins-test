@@ -46,24 +46,32 @@ pipeline {
         }
 
         stage('Start Flask server') {
-            steps {
-                echo "Ejecutando servidor vulnerable..."
-                // launch the app in background, keep its PID
-                sh '''
-                    . venv/bin/activate
-                    nohup python vulnerable_server.py > flask.log 2>&1 &
-                    echo $! > flask.pid
-                    # wait until the HTTP endpoint answers
-                    for i in {1..15}; do
-                        if curl -s ${TARGET_URL}/ > /dev/null; then
-                            echo "Flask is up"
-                            break
-                        fi
-                        sleep 1
-                    done
-                '''
-            }
-        }
+    steps {
+        echo "Ejecutando servidor vulnerable..."
+        sh '''
+            . venv/bin/activate
+
+            nohup python vulnerable_server.py > flask.log 2>&1 &
+            echo $! > flask.pid
+
+            # wait until the HTTP endpoint answers (max 15 seconds)
+            for i in {1..15}; do
+                # curl may return a non‑zero code while the app is still starting.
+                # Adding “|| true” forces a zero exit status so the script does not abort.
+                curl -s -o /dev/null "${TARGET_URL}/" || true
+
+                # check the HTTP status code; any 2xx/3xx means the service is up
+                HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${TARGET_URL}/" || true)
+                if [[ "$HTTP_CODE" =~ ^2|3 ]]; then
+                    echo "Flask is up (HTTP $HTTP_CODE)"
+                    break
+                fi
+
+                sleep 1
+            done
+        '''
+    }
+}
 
         stage('OWASP ZAP (DAST Scan)') {
             agent {
