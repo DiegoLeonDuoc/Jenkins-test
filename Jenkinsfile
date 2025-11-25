@@ -126,6 +126,7 @@ pipeline {
                     }
                 }
             }
+        }
 
         stage('Stop Flask server') {
             steps {
