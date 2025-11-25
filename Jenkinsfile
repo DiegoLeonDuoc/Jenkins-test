@@ -103,7 +103,7 @@ pipeline {
                     cd /zap/wrk
                     zap-baseline.py \
                     -t ${JENKINS_URL}:${FLASK_PORT} \
-                    -r zap_report.html
+                    -r zap_report.html > /dev/null 2>&1
                     ls -la
                 '''
             }
