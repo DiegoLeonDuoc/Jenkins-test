@@ -134,15 +134,15 @@ pipeline {
                     reportName: 'OWASP Dependency Check Report',
                     includes: '**/*.html'
                 ])
-                publishHTML([
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: true,
-                    keepAll: true,
-                    reportDir: '',
-                    reportFiles: 'zap_report.html',
-                    reportName: 'OWASP ZAP Report',
-                    includes: '**/*.html'
-                ])
+//                 publishHTML([
+//                     allowMissing: false,
+//                     alwaysLinkToLastBuild: true,
+//                     keepAll: true,
+//                     reportDir: '',
+//                     reportFiles: 'zap_report.html',
+//                     reportName: 'OWASP ZAP Report',
+//                     includes: '**/*.html'
+//                 ])
                 publishHTML([
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
@@ -152,6 +152,7 @@ pipeline {
                     reportName: 'PIP Audit Report',
                     includes: '**/*'
                 ])
+                archiveArtifacts artifacts: 'zap_report.html', fingerprint: true
                 echo "Finalizado."
             }
         }
