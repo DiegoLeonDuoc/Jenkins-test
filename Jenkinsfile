@@ -100,10 +100,12 @@ pipeline {
             steps {
                 echo "Ejecutando escaneo dinámico con OWASP ZAP..."
                 sh '''
+                    pwd
                     zap-baseline.py \
                     -t ${JENKINS_URL}:${FLASK_PORT} \
-                    -r ../../zap_report.html > /dev/null 2>&1 || true
+                    -r zap_report.html > /dev/null 2>&1 || true
                     ls -la
+
                 '''
             }
         }
