@@ -101,7 +101,7 @@ pipeline {
                 echo "Ejecutando escaneo dinámico con OWASP ZAP..."
                 sh '''
                     cd /zap/wrk
-                    zap-baseline.py -t ${JENKINS_URL}:${FLASK_PORT} -r ../../var/jenkins_home/workspace/Test-Pipeline-Sonar/zap_report.html > /dev/null 2>&1 || true
+                    zap-baseline.py -t ${JENKINS_URL}:${FLASK_PORT} -r ../../var/jenkins_home/workspace/Test-Pipeline-Sonar/zap_report.html
                     ls -la
                     cd ..
                     ls -la
@@ -138,15 +138,15 @@ pipeline {
                     reportName: 'OWASP Dependency Check Report',
                     includes: '**/*.html'
                 ])
-//                 publishHTML([
-//                     allowMissing: false,
-//                     alwaysLinkToLastBuild: true,
-//                     keepAll: true,
-//                     reportDir: '',
-//                     reportFiles: 'zap_report.html',
-//                     reportName: 'OWASP ZAP Report',
-//                     includes: '**/*.html'
-//                 ])
+                publishHTML([
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: '',
+                    reportFiles: 'zap_report.html',
+                    reportName: 'OWASP ZAP Report',
+                    includes: '**/*.html'
+                ])
                 publishHTML([
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
