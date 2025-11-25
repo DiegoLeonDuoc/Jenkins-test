@@ -94,7 +94,7 @@ pipeline {
             agent {
                 docker {
                     image 'zaproxy/zap-stable'
-                    args '-v $WORKSPACE:/zap/wrk --network host'
+                    args '-v $WORKSPACE:/zap/wrk --network host -u root'
                 }
             }
             steps {
@@ -103,7 +103,8 @@ pipeline {
                     cd /zap/wrk
                     zap-baseline.py \
                     -t ${JENKINS_URL}:${FLASK_PORT} \
-                    -r zap_report.html > /dev/null 2>&1 || true
+                    -r /zap/wrk/zap_report.html > /dev/null 2>&1 || true
+                    ls -la
                 '''
             }
         }
