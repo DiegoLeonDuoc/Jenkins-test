@@ -63,7 +63,7 @@ pipeline {
             agent {
                 docker {
                     image 'zaproxy/zap-stable'
-                    args '-v $WORKSPACE:/zap/wrk'
+                    args '-v $WORKSPACE:/zap/wrk --network host'
                 }
 
             }
