@@ -99,33 +99,33 @@ pipeline {
             }
             steps {
                 echo "Ejecutando escaneo dinámico con OWASP ZAP..."
+                echo "$WORKSPACE"
                 sh '''
                     cd /zap/wrk
                     zap-baseline.py -t ${JENKINS_URL}:${FLASK_PORT} -r /zap/wrk/zap_report.html
                 '''
             }
-        }
-        post {
-            always {
-                // This runs outside the container, in the Jenkins workspace
-                script {
-                    if (fileExists('zap_report.html')) {
-                        echo "Report found in workspace"
-                        publishHTML([
-                            allowMissing: false,
-                            alwaysLinkToLastBuild: true,
-                            keepAll: true,
-                            reportDir: '',
-                            reportFiles: 'zap_report.html',
-                            reportName: 'ZAP Security Report'
-                        ])
-                    } else {
-                        echo "Report not found. Workspace contents:"
-                        sh 'ls -la'
+            post {
+                always {
+                    // This runs outside the container, in the Jenkins workspace
+                    script {
+                        if (fileExists('zap_report.html')) {
+                            echo "Report found in workspace"
+                            publishHTML([
+                                allowMissing: false,
+                                alwaysLinkToLastBuild: true,
+                                keepAll: true,
+                                reportDir: '',
+                                reportFiles: 'zap_report.html',
+                                reportName: 'ZAP Security Report'
+                            ])
+                        } else {
+                            echo "Report not found. Workspace contents:"
+                            sh 'ls -la'
+                        }
                     }
                 }
             }
-        }
 
         stage('Stop Flask server') {
             steps {
