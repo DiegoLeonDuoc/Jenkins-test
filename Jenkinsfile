@@ -121,38 +121,46 @@ pipeline {
             }
         }
 
+//         stage('Publish Reports') {
+//             steps {
+//                 echo "Publicando reporte y finalizando..."
+//                 publishHTML([
+//                     allowMissing: false,
+//                     alwaysLinkToLastBuild: true,
+//                     keepAll: true,
+//                     reportDir: 'dependency-check-report',
+//                     reportFiles: 'dependency-check-report.html',
+//                     reportName: 'OWASP Dependency Check Report',
+//                     includes: '**/*.html'
+//                 ])
+//                 publishHTML([
+//                     allowMissing: false,
+//                     alwaysLinkToLastBuild: true,
+//                     keepAll: true,
+//                     reportDir: '',
+//                     reportFiles: 'zap_report.html',
+//                     reportName: 'OWASP ZAP Report',
+//                     includes: '**/*.html'
+//                 ])
+//                 publishHTML([
+//                     allowMissing: false,
+//                     alwaysLinkToLastBuild: true,
+//                     keepAll: true,
+//                     reportDir: 'dependency-check-report',
+//                     reportFiles: 'pip-audit.md',
+//                     reportName: 'PIP Audit Report',
+//                     includes: '**/*'
+//                 ])
+//                 echo "Finalizado."
+//             }
+//         }
         stage('Publish Reports') {
             steps {
                 echo "Publicando reporte y finalizando..."
-                publishHTML([
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: true,
-                    keepAll: true,
-                    reportDir: 'dependency-check-report',
-                    reportFiles: 'dependency-check-report.html',
-                    reportName: 'OWASP Dependency Check Report',
-                    includes: '**/*.html'
-                ])
-                publishHTML([
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: true,
-                    keepAll: true,
-                    reportDir: '',
-                    reportFiles: 'zap_report.html',
-                    reportName: 'OWASP ZAP Report',
-                    includes: '**/*.html'
-                ])
-                publishHTML([
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: true,
-                    keepAll: true,
-                    reportDir: 'dependency-check-report',
-                    reportFiles: 'pip-audit.md',
-                    reportName: 'PIP Audit Report',
-                    includes: '**/*'
-                ])
+                archiveArtifacts artifacts: 'dependency-check-report/dependency-check-report.html', fingerprint: true
+                archiveArtifacts artifacts: 'zap_report.html', fingerprint: true
+                archiveArtifacts artifacts: 'dependency-check-report/pip-audit.md', fingerprint: true
                 echo "Finalizado."
             }
         }
-    }
 }
