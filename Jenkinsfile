@@ -45,6 +45,34 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            steps {
+                echo "Ejecutando análisis con SonarQube"
+                script {
+                    def scannerHome = tool 'SonarQube Scanner'
+                    withSonarQubeEnv('SonarQube Install') {
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                                -Dsonar.projectKey=$PROJECT_NAME \
+                                -Dsonar.sources=. \
+                                -Dsonar.host.url=$SONARQUBE_URL \
+                                -Dsonar.login=$SONARQUBE_TOKEN
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Dependency Check') {
+            environment {
+                NVD_API_KEY = credentials('nvdApiKey')
+            }
+            steps {
+                echo "Ejecutando Dependency Check..."
+                dependencyCheck additionalArguments: "--scan . --format HTML --out dependency-check-report --enableExperimental --enableRetired --disableRetireJS --nvdApiKey ${NVD_API_KEY}", odcInstallation: 'Dependency Check'
+            }
+        }
+
         stage('Start Flask server') {
             steps {
                 echo "Ejecutando servidor vulnerable..."
@@ -88,34 +116,6 @@ pipeline {
                         echo "PID file not found"
                     fi
                 '''
-            }
-        }
-        
-        stage('SonarQube Analysis') {
-            steps {
-                echo "Ejecutando análisis con SonarQube"
-                script {
-                    def scannerHome = tool 'SonarQube Scanner'
-                    withSonarQubeEnv('SonarQube Install') {
-                        sh """
-                            ${scannerHome}/bin/sonar-scanner \
-                                -Dsonar.projectKey=$PROJECT_NAME \
-                                -Dsonar.sources=. \
-                                -Dsonar.host.url=$SONARQUBE_URL \
-                                -Dsonar.login=$SONARQUBE_TOKEN
-                        """
-                    }
-                }
-            }
-        }
-
-        stage('Dependency Check') {
-            environment {
-                NVD_API_KEY = credentials('nvdApiKey')
-            }
-            steps {
-                echo "Ejecutando Dependency Check..."
-                dependencyCheck additionalArguments: "--scan . --format HTML --out dependency-check-report --enableExperimental --enableRetired --disableRetireJS --nvdApiKey ${NVD_API_KEY}", odcInstallation: 'Dependency Check'
             }
         }
 
