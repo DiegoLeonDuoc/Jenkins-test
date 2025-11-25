@@ -23,7 +23,7 @@ pipeline {
         stage('Setup Environment') {
             steps {
                 echo "Configurando Python..."
-                ls
+                sh "ls -l"
                 sh '''
                     python3 -m venv venv
                     . venv/bin/activate
