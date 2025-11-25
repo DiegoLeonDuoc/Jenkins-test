@@ -36,10 +36,9 @@ pipeline {
             steps {
                 echo "Ejecutando escaneo dinámico con OWASP ZAP..."
                 sh '''
-                docker run --network="host" --rm \
-                zaproxy/zap-stable zap-baseline.py \
-                -t ${TARGET_URL} \
-                -r zap_report.html
+                    zap-baseline.py \
+                    -t ${TARGET_URL} \
+                    -r zap_report.html
                 '''
             }
         }
