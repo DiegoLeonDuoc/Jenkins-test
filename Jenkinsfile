@@ -54,15 +54,7 @@ pipeline {
                     echo $! > flask.pid
                     echo "Esperando servidor..."
                     sleep 10
-                    curl localhost:5000
-                    # wait until the HTTP endpoint answers
-                    for i in {1..15}; do
-                        if curl -s ${TARGET_URL}/ > /dev/null; then
-                            echo "Flask is up"
-                            break
-                        fi
-                        sleep 1
-                    done
+                    curl ${TARGET_URL}
                 '''
             }
         }
