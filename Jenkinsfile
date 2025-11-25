@@ -12,6 +12,7 @@ pipeline {
     stages {
         stage('Install Python') {
             steps {
+                echo "Instalando Python..."
                 sh '''
                     apt update
                     apt install -y python3 python3-venv python3-pip
@@ -21,6 +22,8 @@ pipeline {
         
         stage('Setup Environment') {
             steps {
+                echo "Configurando Python..."
+                ls
                 sh '''
                     python3 -m venv venv
                     . venv/bin/activate
@@ -32,6 +35,7 @@ pipeline {
 
         stage('Python Security Audit') {
             steps {
+                echo "Ejecutando Dependency Check con Python..."
                 sh '''
                     . venv/bin/activate
                     pip install pip-audit
@@ -43,6 +47,7 @@ pipeline {
 
         stage('Start Flask server') {
             steps {
+                echo "Ejecutando servidor vulnerable..."
                 // launch the app in background, keep its PID
                 sh '''
                     . venv/bin/activate
@@ -80,6 +85,7 @@ pipeline {
 
         stage('Stop Flask server') {
             steps {
+                echo "Deteniendo servidor vulnerable..."
                 sh '''
                     if [ -f flask.pid ]; then
                         kill $(cat flask.pid) && echo "Flask stopped"
@@ -92,6 +98,7 @@ pipeline {
         
         stage('SonarQube Analysis') {
             steps {
+                echo "Ejecutando análisis con SonarQube"
                 script {
                     def scannerHome = tool 'SonarQube Scanner'
                     withSonarQubeEnv('SonarQube Install') {
@@ -112,12 +119,14 @@ pipeline {
                 NVD_API_KEY = credentials('nvdApiKey')
             }
             steps {
+                echo "Ejecutando Dependency Check..."
                 dependencyCheck additionalArguments: "--scan . --format HTML --out dependency-check-report --enableExperimental --enableRetired --disableRetireJS --nvdApiKey ${NVD_API_KEY}", odcInstallation: 'Dependency Check'
             }
         }
 
         stage('Publish Reports') {
             steps {
+                echo "Publicando reporte y finalizando..."
                 publishHTML([
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
@@ -126,6 +135,7 @@ pipeline {
                     reportFiles: 'dependency-check-report.html',
                     reportName: 'OWASP Dependency Check Report'
                 ])
+                echo "Finalizado."
             }
         }
 
