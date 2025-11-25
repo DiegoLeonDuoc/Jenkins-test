@@ -102,12 +102,6 @@ pipeline {
                 sh '''
                     cd /zap/wrk
                     zap-baseline.py -t ${JENKINS_URL}:${FLASK_PORT} -r ../../var/jenkins_home/workspace/Test-Pipeline-Sonar/zap_report.html > /dev/null 2>&1 || true
-                    ls -la
-                    cd ..
-                    ls -la
-                    cd ..
-                    ls -la
-                    ls -la /var/jenkins_home/workspace/Test-Pipeline-Sonar
                 '''
             }
         }
