@@ -5,7 +5,8 @@ pipeline {
         PROJECT_NAME = "pipeline-test"
         SONARQUBE_URL = "http://sonarqube:9000"
         SONARQUBE_TOKEN = "sqa_d8a9666b36e5cc9a23732692362a620bbc36a7e8"
-        TARGET_URL = "http://localhost:5000/"
+        FLASK_PORT = '5000'
+        TARGET_URL = "http://127.0.0.1:${FLASK_PORT}"
     }
 
     stages {
@@ -40,72 +41,54 @@ pipeline {
             }
         }
 
+        stage('Start Flask server') {
+            steps {
+                // launch the app in background, keep its PID
+                sh '''
+                    . venv/bin/activate
+                    nohup python vulnerable_server.py > flask.log 2>&1 &
+                    echo $! > flask.pid
+                    # wait until the HTTP endpoint answers
+                    for i in {1..15}; do
+                        if curl -s ${TARGET_URL}/ > /dev/null; then
+                            echo "Flask is up"
+                            break
+                        fi
+                        sleep 1
+                    done
+                '''
+            }
+        }
+
         stage('OWASP ZAP (DAST Scan)') {
             agent {
                 docker {
                     image 'zaproxy/zap-stable'
-                    args '-v $WORKSPACE:/zap/wrk --network host'
+                    args '-v $WORKSPACE:/zap/wrk'
                 }
+
             }
             steps {
-                script {
-                    sh '''
-                        set -e
-                        . /zap/wrk/venv/bin/activate
-
-                        nohup python /zap/wrk/app.py > flask.log 2>&1 &
-                        echo $! > flask.pid
-
-                        echo "Waiting for Flask to become reachable..."
-                        for i in {1..10}; do
-                            if curl -s http://172.18.0.1:5000/ > /dev/null; then
-                                echo "Flask is up!"
-                                break
-                            fi
-                            sleep 1
-                        done
-                    '''
-
-                    // 2️⃣ Run the ZAP baseline scan
-                    sh '''
-                        echo "Running ZAP baseline scan..."
-                        zap-baseline.py \
-                            -t ${TARGET_URL} \
-                            -r zap_report.html
-                    '''
-
-                    // 3️⃣ Stop the Flask process
-                    sh '''
-                        if [ -f flask.pid ]; then
-                            kill $(cat flask.pid) && echo "Flask stopped"
-                        else
-                            echo "No Flask PID file – nothing to kill"
-                        fi
-                    '''
-                }
-
-                // Archive the ZAP report for later review
-                archiveArtifacts artifacts: 'zap_report.html', fingerprint: true
+                echo "Ejecutando escaneo dinámico con OWASP ZAP..."
+                sh '''
+                    zap-baseline.py \
+                    -t ${TARGET_URL} \
+                    -r zap_report.html
+                '''
             }
         }
 
-//         stage('OWASP ZAP (DAST Scan)') {
-//             agent {
-//                 docker {
-//                     image 'zaproxy/zap-stable'
-//                     args '-v $WORKSPACE:/zap/wrk'
-//                 }
-//
-//             }
-//             steps {
-//                 echo "Ejecutando escaneo dinámico con OWASP ZAP..."
-//                 sh '''
-//                     zap-baseline.py \
-//                     -t ${TARGET_URL} \
-//                     -r zap_report.html
-//                 '''
-//             }
-//         }
+        stage('Stop Flask server') {
+            steps {
+                sh '''
+                    if [ -f flask.pid ]; then
+                        kill $(cat flask.pid) && echo "Flask stopped"
+                    else
+                        echo "PID file not found"
+                    fi
+                '''
+            }
+        }
         
         stage('SonarQube Analysis') {
             steps {
